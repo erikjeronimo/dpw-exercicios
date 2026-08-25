@@ -1,0 +1,25 @@
+{
+  "name": "dpw-exercicios",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "verificar": "node --version && pnpm --version"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.23.0",
+      "onFail": "download"
+    }
+  },
+  "packageManager": "pnpm@11.23.0",
+  "type": "module",
+  "devDependencies": {
+    "prettier": "^3.9.6"
+  }
+}
