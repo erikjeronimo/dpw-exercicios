@@ -1,75 +1,124 @@
-﻿# E00.5 - Diagnostico do repositorio
+## E00.5 - Roteiro de diagnostico
 
-## 1. Estado da branch e da arvore de trabalho
+O objetivo deste exercicio foi diagnosticar um problema de dependencia utilizando um roteiro de verificacao, eliminando as hipoteses de forma progressiva.
+O cenario utilizado foi:
 
-Comando:
+> "Instalei o pacote, mas o import fala que nao existe."
 
-git status --short --branch
+O diagnostico foi realizado no repositorio `dpw-exercicios`.
 
-Saida:
+### Passo 1 - Verificar o diretorio do projeto
 
-## master...origin/master [ahead 7]
-
-A branch master esta 7 commits a frente da branch remota origin/master.
-
-Nao existem arquivos modificados ou nao rastreados.
-
-## 2. Branches locais e rastreamento remoto
+Primeiramente, foi verificado se o terminal estava localizado na pasta correta do projeto.
 
 Comando:
+```powershell
+Get-Location
+```
+Resultado:
+C:\dev\dpw-exercicios
+Em seguida, foram verificados os arquivos existentes no diretorio:
+Get-ChildItem
 
-git branch -vv
+A verificacao confirmou a existencia da pasta evidencias e dos principais arquivos do projeto, incluindo:
 
-Saida:
+.env.example
+.gitattributes
+.gitignore
+package.json
+pnpm-lock.yaml
+README.md
 
-feat/titulo-a a518eca docs: altera titulo na branch A
-feat/titulo-b f4ce33b docs: altera titulo na branch B
-master        820b261 [origin/master: ahead 7] docs: adiciona evidencia de desfazer
+Conclusao:
 
-As branches feat/titulo-a e feat/titulo-b continuam registradas localmente.
+O projeto estava sendo executado a partir do diretorio correto. Portanto, a hipotese de o comando estar sendo executado na pasta errada foi eliminada.
 
-A branch master esta vinculada a origin/master e possui 7 commits a mais que a branch remota.
+## Passo 2 - Verificar as dependencias declaradas
 
-## 3. Historico recente
-
+Depois foi verificado quais dependencias estavam registradas no projeto.
 Comando:
 
-git log --oneline --decorate --graph --all -10
+pnpm list --depth 0
 
-Saida:
+Resultado:
+Legend: production dependency, optional only, dev only
+dpw-exercicios@1.0.0 C:\dev\dpw-exercicios (PRIVATE)
+devDependencies:
+prettier@3.9.6
+1 package
 
-* 820b261 (HEAD -> master) docs: adiciona evidencia de desfazer
-* 2d465ff docs: adiciona evidencia de conflito
-*   98f130f merge: resolve conflito de titulo
-|\
-| * f4ce33b (feat/titulo-b) docs: altera titulo na branch B
-* | a518eca (feat/titulo-a) docs: altera titulo na branch A
-|/
-* 176d337 docs: adiciona evidencia de arqueologia
-* 8d429a9 docs: adiciona evidencias dos exercicios
-* 7bbb94e (origin/master) fix: corrigindo variaveis do ambiente
-* 66cc098 chore: configura projeto inicial
+Conclusao:
+A dependencia prettier estava registrada no projeto como devDependency.
+Portanto, a hipotese de que o pacote nao estava declarado no package.json foi eliminada.
 
-O historico mostra o merge entre as branches feat/titulo-a e feat/titulo-b.
+## Passo 3 - Verificar as dependencias instaladas localmente
 
-## 4. Verificacao de alteracoes
-
+Foi verificado se a pasta node_modules existia.
 Comando:
+Test-Path node_modules
 
-git diff HEAD
+Resultado:
+False
+Conclusao:
+A pasta node_modules nao existia no projeto.
+Isso indicou que as dependencias estavam declaradas no projeto, mas nao estavam instaladas localmente.
+Nesse momento foi identificada a causa do problema.
 
-Saida:
+## Passo 4 - Reinstalar as dependencias
 
-Nenhuma saida.
+Depois de identificar a causa, as dependencias foram reinstaladas utilizando o arquivo pnpm-lock.yaml.
+Comando:
+pnpm install --frozen-lockfile
+A instalacao foi concluida utilizando as versoes registradas no lockfile.
+Em seguida, foi verificada novamente a existencia da pasta node_modules:
+Test-Path node_modules
 
-Isso confirma que nao existem alteracoes locais em relacao ao ultimo commit.
+Resultado:
+True
+Tambem foi realizada uma nova verificacao das dependencias:
+pnpm list --depth 0
 
-## 5. Conclusao
+Resultado:
+Legend: production dependency, optional only, dev only
+dpw-exercicios@1.0.0 C:\dev\dpw-exercicios (PRIVATE)
+devDependencies:
+prettier@3.9.6
+1 package
 
-O repositorio esta em um estado limpo.
+Conclusao:
+A pasta node_modules foi recriada e a dependencia prettier voltou a estar instalada localmente.
+O parametro --frozen-lockfile foi utilizado para garantir que a instalacao respeitasse as versoes registradas no pnpm-lock.yaml.
 
-A branch master possui 7 commits locais que ainda nao foram enviados para origin/master.
+## Passo 5 - Confirmar o funcionamento do ambiente
 
-As branches utilizadas no exercicio continuam disponiveis e o historico registra o merge realizado.
+Por fim, foi executado o script de verificacao configurado no projeto.
+Comando:
+pnpm verificar
 
-O comando git diff HEAD confirmou que nao existem alteracoes pendentes.
+Resultado:
+$ node --version && pnpm --version
+v24.14.0
+11.23.0
+
+Conclusao:
+O ambiente foi confirmado como funcional.
+O problema nao estava no package.json nem na declaracao da dependencia. A causa encontrada foi a ausencia da pasta node_modules, que continha as dependencias instaladas localmente.
+
+Resumo do diagnostico
+
+O roteiro utilizado eliminou as hipoteses na seguinte ordem:
+Foi confirmado o diretorio correto do projeto.
+Foi verificado que a dependencia prettier estava declarada.
+Foi identificado que a pasta node_modules nao existia.
+As dependencias foram reinstaladas com pnpm install --frozen-lockfile.
+O ambiente foi validado com pnpm verificar.
+A causa real encontrada foi a ausencia das dependencias instaladas localmente.
+
+A correcao utilizada foi:
+pnpm install --frozen-lockfile
+Evidencia completa
+
+A evidencia completa do exercicio, incluindo os comandos utilizados e os resultados do diagnostico, esta disponivel em:
+Ver evidencia do E00.5
+
+**Esse conteúdo pode entrar no seu `README.md` sem precisar colocar os SVGs do material do professor.** Ele também deixa explícito que você fez o que o critério exige: **passos progressivos, eliminação de hipóteses, causa encontrada e correção demonstrada**.
