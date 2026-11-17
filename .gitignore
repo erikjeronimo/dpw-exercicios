@@ -1,1 +1,12 @@
+
 node_modules/
+
+# Arquivos locais da aplicacao
+.env
+.env.*
+!.env.example
+
+# Arquivos gerados
+dist/
+coverage/
+*.tsbuildinfo
